@@ -1,0 +1,16 @@
+{
+    "manifest_version": 3,
+    "name": "ToxiBlock",
+    "description": "Block Hate Speach",
+    "version": "1.0",
+    "content_scripts": [
+        {
+        "matches": ["<all_urls>"],
+        "js": ["dist/content.js"]
+        }
+    ],
+    "permissions": ["storage", "activeTab", "scripting"],
+    "action": {
+      "default_popup": "index.html"
+    }
+  }
