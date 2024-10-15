@@ -4,13 +4,18 @@
     "description": "Block Hate Speach",
     "version": "1.0",
     "content_scripts": [
-        {
-        "matches": ["<all_urls>"],
-        "js": ["dist/content.js"]
-        }
-    ],
-    "permissions": ["storage", "activeTab", "scripting"],
-    "action": {
-      "default_popup": "index.html"
+    {
+      "matches": ["https://x.com/*"],
+      "js": ["dist/content.js"]
     }
+  ],
+  "permissions": [
+    "storage", 
+    "activeTab", 
+    "scripting",
+    "http://localhost:5000/*"
+  ],
+  "action": {
+    "default_popup": "src/index.html"
   }
+}
