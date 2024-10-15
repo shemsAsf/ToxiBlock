@@ -1,4 +1,5 @@
 let censorCount = 0;
+let censorCountToSend = 0;
 
 async function censoredText(element: HTMLElement) {
     const textContent = element.innerText;
@@ -20,6 +21,9 @@ async function censoredText(element: HTMLElement) {
                 const censoredText = textContent.replace(/[^ ]/g, '*');
                 element.innerText = censoredText; 
                 censorCount ++;
+                censorCountToSend ++;
+                chrome.storage.local.set({ 'censorCount': censorCount });
+                chrome.runtime.sendMessage({ count: censorCount });
             }
         } else {
             console.error('Error detecting hate speech:', response.statusText);
@@ -27,6 +31,22 @@ async function censoredText(element: HTMLElement) {
     } catch (error) {
         console.error('Error:', error);
     }
+}
+
+function logCensorCount(): void {
+    fetch('http://localhost:5000/log_censor', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ count: censorCountToSend }),
+    }).then(response => response.json())
+      .then(data => {
+          console.log('Censor log stored:', data);
+      })
+      .catch((error) => {
+          console.error('Error logging censor data:', error);
+      });
 }
 
 function processElements(newElements: HTMLElement[]) {
@@ -76,3 +96,10 @@ function observeDocumentChanges() {
 // Start observing for document changes with the desired selectors
 const textSelectors = ['[data-testid="tweetText"]', '[data-testid="postText"]']; // List of selectors for text elements
 observeDocumentChanges();
+
+setInterval(() => {
+    if (censorCount > 0) {
+        logCensorCount();
+        censorCountToSend = 0; 
+    }
+}, (5000));
