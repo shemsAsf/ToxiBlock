@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ToxiBlock</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 20px;
+            width: 300px;
+        }
+
+        .container {
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 22px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        p {
+            margin: 5px 0;
+            font-size: 16px;
+            color: #666;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            font-size: 14px;
+        }
+
+        .score-box {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px;
+            margin-top: 20px;
+            border-radius: 8px;
+            font-size: 18px;
+        }
+
+        .score-box span {
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        .footer {
+            font-size: 12px;
+            color: #888;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Nom de l'extension -->
+        <h1>ToxiBlock</h1>
+
+        <!-- Description -->
+        <p>Bloqueur de contenu toxique</p>
+
+        <!-- Statistiques -->
+        <div class="stats">
+            <p>Éléments bloqués sur cette page :</p>
+            <p id="blocked-this-page">0</p>
+        </div>
+
+        <div class="stats">
+            <p>Éléments bloqués ce mois-ci :</p>
+            <p id="blocked-this-month">0</p>
+        </div>
+
+        <div class="stats">
+            <p>Éléments bloqués au total :</p>
+            <p id="blocked-total">0</p>
+        </div>
+
+        <!-- Score total dans un rectangle -->
+        <div class="score-box">
+            Score Total : <span id="total-score">0</span>
+        </div>
+
+        <!-- Pied de page avec des informations -->
+        <div class="footer">
+            <p>Protégez-vous du contenu toxique avec ToxiBlock.</p>
+        </div>
+    </div>
+
+    <!-- Inclure le fichier popup.js -->
+    <script src="popup.js"></script>
+</body>
+</html>
