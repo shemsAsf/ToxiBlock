@@ -5,15 +5,14 @@ let CTotal = 0;
 
 function updateCensorCount(): void {
     const counts = { 
-        actual: CActual, 
-        today: CToday, 
-        month: CMonth, 
-        total: CTotal 
+        'this-page': CActual, 
+        'today': CToday, 
+        'this-month': CMonth, 
+        'total': CTotal 
     };
 
-    // Directly using IDs without transformation
     Object.entries(counts).forEach(([key, value]) => {
-        const countElement = document.getElementById(`count${key.charAt(0).toUpperCase() + key.slice(1)}`);
+        const countElement = document.getElementById(`blocked-${key}`);
         if (countElement) {
             countElement.textContent = value.toString();
         }
@@ -23,25 +22,25 @@ function updateCensorCount(): void {
 function fetchCensorCount(): void {
     chrome.storage.local.get(['censorCount'], (result) => {
         CActual = result.censorCount || 0;
-        updateCensorCount(); // Update the count after fetching
+        updateCensorCount();
     });
 }
 
-function fetchCensorCountFromAPI(endpoint: string, updateVar: (count: number) => void): void {
-    fetch(endpoint)
+function fetchCensorCountFromAPI(): void {
+    fetch('http://localhost:5000/get_censor_counts')
         .then(response => response.json())
         .then(data => {
-            updateVar(data[Object.keys(data)[0]] || 0); // Use the first key to get the count
+            CTotal = data.total_count || 0;
+            CToday = data.today_count || 0;
+            CMonth = data.month_count || 0;
             updateCensorCount(); // Update the display after fetching
         })
         .catch((error) => {
-            console.error(`Error fetching censor count from ${endpoint}:`, error);
+            console.error('Error fetching censor counts from API:', error);
         });
 }
 
 document.addEventListener('DOMContentLoaded', () => {
     fetchCensorCount();
-    fetchCensorCountFromAPI('http://localhost:5000/get_total_censor_count', (count) => CTotal = count);
-    fetchCensorCountFromAPI('http://localhost:5000/get_today_censor_count', (count) => CToday = count);
-    fetchCensorCountFromAPI('http://localhost:5000/get_month_censor_count', (count) => CMonth = count);
+    fetchCensorCountFromAPI();
 });

@@ -1,5 +1,25 @@
-let censorCount = 0;
-let censorCountToSend = 0;
+interface CensorCounts {
+    Toxic: number;
+    Severe_toxic: number;
+    Obscene: number;
+    Threat: number;
+    Insult: number;
+    Identity_hate: number;
+    Total: number;
+}
+
+// Initialize the censorCounts object with the specified type
+const censorCounts: CensorCounts = {
+    Toxic: 0,
+    Severe_toxic: 0,
+    Obscene: 0,
+    Threat: 0,
+    Insult: 0,
+    Identity_hate: 0,
+    Total: 0,
+};
+
+let newCensoredElem = false;
 
 async function censoredText(element: HTMLElement) {
     const textContent = element.innerText;
@@ -16,17 +36,22 @@ async function censoredText(element: HTMLElement) {
 
         if (response.ok) {
             const data = await response.json();
-            if (data.is_hateful) {
+            if (data.category !== "safe") {
+                const detectedCategory: keyof CensorCounts = data.category;
+
                 const span = document.createElement('span');
                 span.style.color = 'red';
                 span.textContent = textContent; // Set the text content to the original text
+                span.title = `Detected category: ${detectedCategory}`;
                 element.innerHTML = ''; // Clear previous content
                 element.appendChild(span); // Append the styled span
-                
-                censorCount ++;
-                censorCountToSend ++;
-                chrome.storage.local.set({ 'censorCount': censorCount });
-                chrome.runtime.sendMessage({ count: censorCount });
+
+                censorCounts[detectedCategory] = (censorCounts[detectedCategory] || 0) + 1;
+                censorCounts["Total"] = (censorCounts["Total"] || 0) + 1;
+
+                chrome.storage.local.set({ 'censorCount': censorCounts["Total"] });
+                chrome.runtime.sendMessage({ count: censorCounts["Total"] });
+                newCensoredElem = true;
             }
         } else {
             console.error('Error detecting hate speech:', response.statusText);
@@ -37,18 +62,35 @@ async function censoredText(element: HTMLElement) {
 }
 
 function logCensorCount(): void {
+    const dataToSend = {
+        Toxic: censorCounts.Toxic,
+        Severe_toxic: censorCounts.Severe_toxic,
+        Obscene: censorCounts.Obscene,
+        Threat: censorCounts.Threat,
+        Insult: censorCounts.Insult,
+        Identity_hate: censorCounts.Identity_hate,
+    };
+
+
     fetch('http://localhost:5000/log_censor', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ count: censorCountToSend }),
+        body: JSON.stringify(dataToSend),
     }).then(response => response.json())
       .then(data => {
-          console.log('Censor log stored:', data);
+            console.log('Censor log stored:', data);
+
+            // Reset the counts for each category except Total
+            for (let category in censorCounts) {
+                if (category !== 'Total') {
+                    censorCounts[category as keyof CensorCounts] = 0;
+                }
+            }
       })
       .catch((error) => {
-          console.error('Error logging censor data:', error);
+            console.error('Error logging censor data:', error);
       });
 }
 
@@ -101,8 +143,8 @@ const textSelectors = ['[data-testid="tweetText"]', '[data-testid="postText"]'];
 observeDocumentChanges();
 
 setInterval(() => {
-    if (censorCount > 0) {
+    if(newCensoredElem){
         logCensorCount();
-        censorCountToSend = 0; 
+        newCensoredElem = false;
     }
 }, (5000));
