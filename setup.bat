@@ -16,6 +16,22 @@ call venv\Scripts\activate
 echo Installing dependencies from requirements.txt...
 pip install -r requirements.txt
 
+:: Check if node_modules directory exists
+if not exist "node_modules" (
+    echo Installing Node.js dependencies...
+    npm install
+) else (
+    echo Node.js dependencies are already installed.
+)
+
+:: Install TypeScript locally
+if not exist "node_modules\typescript" (
+    echo Installing TypeScript locally...
+    npm install typescript --save-dev
+) else (
+    echo TypeScript is already installed locally.
+)
+
 echo Setup complete!
 echo To activate the virtual environment manually later, run:
 echo venv\Scripts\activate

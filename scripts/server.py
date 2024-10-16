@@ -29,6 +29,24 @@ def init_db():
         print("Table 'censor_log' exists or was created successfully.")
     else:
         print("Failed to create the table 'censor_log'.")
+
+        
+
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS censored_words (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            word TEXT
+        )
+    ''')
+    conn.commit()
+
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='censored_words';")
+    table_exists = cursor.fetchone()
+    
+    if table_exists:
+        print("Table 'censored_words' exists or was created successfully.")
+    else:
+        print("Failed to create the table 'censored_words'.")
     
     conn.close()
     print("Database initialized successfully.")
@@ -126,6 +144,40 @@ def get_top_categories():
     ]
 
     return jsonify(response), 200
+
+@app.route('/add_censored_word', methods=['POST'])
+def addCensoredWord():
+    data = request.json
+    word = data.get('word', '')
+
+    conn = sqlite3.connect('censor_data.db')
+    cursor = conn.cursor()
+
+    cursor.execute('''
+        SELECT word 
+        FROM censored_words 
+        WHERE word = ?
+    ''', )
+    result = cursor.fetchone()
+    if result:
+        print("Word already censored.")
+    else:
+        cursor.execute('INSERT INTO censored_words (word) VALUES (?)', word)
+        print(f"Inserted new entry for {word}")
+
+    conn.close()
+
+@app.route('/get_censored_words', methods=['POST'])
+def getCensoredWords():
+    conn = sqlite3.connect('censor_data.db')
+    cursor = conn.cursor()
+
+    cursor.execute('''
+        SELECT word 
+        FROM censored_words 
+    ''', )
+    result = cursor.fetchall() or []
+    return jsonify({'censoredWords' : result}), 200
 
 
 if __name__ == '__main__':

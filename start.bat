@@ -4,7 +4,7 @@
 call venv\Scripts\activate
 
 :: Run TypeScript Compiler in a new window
-start cmd /c "tsc"
+start cmd /c "npx tsc"
 
 :: Run Webpack in production mode in a new window
 start cmd /c "npx webpack --mode production"

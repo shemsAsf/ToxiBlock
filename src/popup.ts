@@ -122,6 +122,34 @@ function displayCategories(categories: Array<{ category: string; count: number }
     }
 }
 
+async function fetchCensoredWords() {
+    try {
+        const response = await fetch('http://127.0.0.1:5000/get_censored_words'); 
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+
+        const censoredWords = await response.json();
+        displayCategories(censoredWords.censoredWords);
+    } catch (error) {
+        console.error('Error fetching top categories:', error);
+    }
+}
+
+function displayCensoredWords(censoredWords: Array<string>) {
+    const wordsList = document.getElementById('censored-words-list');
+    if (wordsList) {
+        wordsList.innerHTML = '';
+
+        censoredWords.forEach((e) => {
+            let li = document.createElement('li');
+            li.innerText = e;
+            wordsList.appendChild(li);
+        });
+    }
+}
+
+
 document.addEventListener('DOMContentLoaded', () => {
     fetchCensorCount();
     fetchCensorCountFromAPI();
