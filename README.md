@@ -76,20 +76,7 @@ predictions = best_model.predict(padded_sequences)
 # Résultat :
 # Commentaire 1: Toxic: 78%, Insult: 65%
 # Commentaire 2: Aucune toxicité détectée
-```
 
-## Structure du projet
-
-```plaintext
-ToxiBlock/
-│
-├── Model.h5                     # Modèle pré-entraîné pour la classification
-├── tokenizer.pickle              # Tokenizer utilisé pour convertir les textes en séquences
-├── predict_toxicity.py           # Script principal pour prédire la toxicité des commentaires
-├── setup.py                      # Script pour l'installation des dépendances
-├── requirements.txt              # Fichier listant les dépendances du projet
-└── README.md                     # Fichier de documentation du projet
-```
 
 ## Contribution
 
