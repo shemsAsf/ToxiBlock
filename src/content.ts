@@ -17,9 +17,12 @@ async function censoredText(element: HTMLElement) {
         if (response.ok) {
             const data = await response.json();
             if (data.is_hateful) {
-                // Censor the text by replacing each character with '*', except spaces
-                const censoredText = textContent.replace(/[^ ]/g, '*');
-                element.innerText = censoredText; 
+                const span = document.createElement('span');
+                span.style.color = 'red';
+                span.textContent = textContent; // Set the text content to the original text
+                element.innerHTML = ''; // Clear previous content
+                element.appendChild(span); // Append the styled span
+                
                 censorCount ++;
                 censorCountToSend ++;
                 chrome.storage.local.set({ 'censorCount': censorCount });
