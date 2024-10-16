@@ -5,10 +5,10 @@ from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 import pickle
 import re
+import os
 
-# Chemin des fichiers sauvegardés
-model_path = 'Model.h5'
-tokenizer_path = 'tokenizer.pickle'
+model_path = os.path.join('scripts', 'Model.h5')
+tokenizer_path = os.path.join('scripts', 'tokenizer.pickle')
 
 # Charger le modèle pré-entraîné
 best_model = load_model(model_path)
