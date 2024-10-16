@@ -13,6 +13,7 @@ function updateCensorCount(): void {
 
     Object.entries(counts).forEach(([key, value]) => {
         const countElement = document.getElementById(`blocked-${key}`);
+        console.log("updating : " +`blocked-${key}`)
         if (countElement) {
             countElement.textContent = value.toString();
         }

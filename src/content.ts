@@ -19,6 +19,7 @@ const censorCounts: CensorCounts = {
     Total: 0,
 };
 
+const fullCensor = false;
 let newCensoredElem = false;
 
 async function censoredText(element: HTMLElement) {
