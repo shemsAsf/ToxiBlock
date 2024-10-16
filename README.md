@@ -69,7 +69,7 @@ python setup.py install
 
 ```python
 new_comments = ["You are an awful person!", "Have a great day!"]
-```
+
 
 # Faire des prédictions sur les commentaires
 predictions = best_model.predict(padded_sequences)
@@ -77,7 +77,7 @@ predictions = best_model.predict(padded_sequences)
 # Résultat :
 # Commentaire 1: Toxic: 78%, Insult: 65%
 # Commentaire 2: Aucune toxicité détectée
-
+```
 
 ## Contribution
 
