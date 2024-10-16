@@ -69,6 +69,7 @@ python setup.py install
 
 ```python
 new_comments = ["You are an awful person!", "Have a great day!"]
+```
 
 # Faire des prédictions sur les commentaires
 predictions = best_model.predict(padded_sequences)
