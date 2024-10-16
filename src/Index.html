@@ -13,6 +13,17 @@
             width: 300px;
         }
 
+        .rounded-div {
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            padding: 20px;
+            background-color: #f9f9f9; /* Light background for better contrast */
+        }
+
+        .category-item {
+            margin: 5px 0;
+        }
+
         .container {
             text-align: center;
         }
@@ -56,6 +67,7 @@
             margin-top: 15px;
         }
     </style>
+
 </head>
 <body>
     <div class="container">
@@ -79,6 +91,11 @@
         <div class="stats">
             <p>Éléments bloqués ce mois ci :</p>
             <p id="blocked-this-month">0</p>
+        </div>
+
+        <div id="top-categories" class="rounded-div">
+            <h1>Top Censored Categories</h1>
+            <div id="category-list"></div>
         </div>
 
         <!-- Score total dans un rectangle -->

@@ -100,6 +100,33 @@ def get_censor_counts():
         'month_count': month_count
     }), 200
 
+@app.route('/get_top_categories', methods=['GET'])
+def get_top_categories():
+    conn = sqlite3.connect('censor_data.db')
+    cursor = conn.cursor()
+
+    # Query to get the top 3 categories with the most censored elements
+    cursor.execute('''
+        SELECT category, SUM(count) as total_count 
+        FROM censor_log 
+        GROUP BY category 
+        ORDER BY total_count DESC 
+        LIMIT 3
+    ''')
+    top_categories = cursor.fetchall()
+
+    conn.close()
+
+    # Format the response
+    response = [
+        {
+            'category': category,
+            'count': total_count
+        } for category, total_count in top_categories
+    ]
+
+    return jsonify(response), 200
+
 
 if __name__ == '__main__':
     init_db()

@@ -79,8 +79,52 @@ function setupCensorCheckbox() {
     }
 }
 
+async function fetchTopCategories() {
+    try {
+        const response = await fetch('http://127.0.0.1:5000/get_top_categories'); 
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+
+        const categories = await response.json();
+        displayCategories(categories);
+    } catch (error) {
+        console.error('Error fetching top categories:', error);
+    }
+}
+
+function displayCategories(categories: Array<{ category: string; count: number }>) {
+    const categoryList = document.getElementById('category-list');
+    if (categoryList) {
+        categoryList.innerHTML = '';
+
+        categories.forEach((item, index) => {
+            const categoryDiv = document.createElement('div');
+            categoryDiv.textContent = `${item.category}: ${item.count}`;
+            categoryDiv.className = 'category-item';
+
+            // Apply styles based on the index
+            switch (index) {
+                case 0:
+                    categoryDiv.style.color = 'brightred';
+                    categoryDiv.style.fontSize = '1.5em';
+                    break;
+                case 1:
+                    categoryDiv.style.color = 'orange';
+                    break;
+                case 2:
+                    categoryDiv.style.color = 'lightyellow';
+                    break;
+            }
+
+            categoryList.appendChild(categoryDiv);
+        });
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     fetchCensorCount();
     fetchCensorCountFromAPI();
     setupCensorCheckbox();
+    fetchTopCategories();
 });
