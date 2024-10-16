@@ -8,7 +8,6 @@ interface CensorCounts {
     Total: number;
 }
 
-// Initialize the censorCounts object with the specified type
 const censorCounts: CensorCounts = {
     Toxic: 0,
     Severe_toxic: 0,
@@ -19,33 +18,38 @@ const censorCounts: CensorCounts = {
     Total: 0,
 };
 
-const fullCensor = false;
+let isCensorshipEnabled: boolean = false;
+
 let newCensoredElem = false;
 
 async function censoredText(element: HTMLElement) {
     const textContent = element.innerText;
-
-    // Send the text content to your Flask API for hate speech detection
     try {
         const response = await fetch('http://localhost:5000/detect-hate', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ tweet: textContent }), // Sending the text content to detect
+            body: JSON.stringify({ tweet: textContent }),
         });
 
         if (response.ok) {
             const data = await response.json();
             if (data.category !== "safe") {
                 const detectedCategory: keyof CensorCounts = data.category;
-
+                
+                let modifiedTextContent = textContent;
                 const span = document.createElement('span');
-                span.style.color = 'red';
-                span.textContent = textContent; // Set the text content to the original text
+        
+                if (isCensorshipEnabled) {
+                    modifiedTextContent = textContent.replace(/[^ ]/g, '*');
+                } else {
+                    span.style.color = 'red';
+                }
+                span.textContent = modifiedTextContent;
                 span.title = `Detected category: ${detectedCategory}`;
-                element.innerHTML = ''; // Clear previous content
-                element.appendChild(span); // Append the styled span
+                element.innerHTML = ''; 
+                element.appendChild(span);
 
                 censorCounts[detectedCategory] = (censorCounts[detectedCategory] || 0) + 1;
                 censorCounts["Total"] = (censorCounts["Total"] || 0) + 1;
@@ -83,7 +87,6 @@ function logCensorCount(): void {
       .then(data => {
             console.log('Censor log stored:', data);
 
-            // Reset the counts for each category except Total
             for (let category in censorCounts) {
                 if (category !== 'Total') {
                     censorCounts[category as keyof CensorCounts] = 0;
@@ -149,3 +152,16 @@ setInterval(() => {
         newCensoredElem = false;
     }
 }, (5000));
+
+chrome.storage.local.get('censorshipEnabled', (data) => {
+    if (data.censorshipEnabled !== undefined) {
+        isCensorshipEnabled = data.censorshipEnabled;
+    }
+});
+
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.action === 'toggleCensorship') {
+        isCensorshipEnabled = request.enabled;
+        console.log("toggleCensorship ", isCensorshipEnabled);
+    }
+});

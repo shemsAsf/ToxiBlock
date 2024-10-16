@@ -41,7 +41,46 @@ function fetchCensorCountFromAPI(): void {
         });
 }
 
+let previousCensorshipEnabled: boolean = false;
+
+function setupCensorCheckbox() {
+    const checkbox = document.getElementById('toggleCheckbox') as HTMLInputElement; // Type assertion
+
+    if (checkbox) {
+        // Restore the checkbox state from local storage
+        chrome.storage.local.get('censorshipEnabled', (data) => {
+            previousCensorshipEnabled = data.censorshipEnabled !== undefined ? data.censorshipEnabled : false;
+            checkbox.checked = previousCensorshipEnabled;
+        });
+
+        checkbox.addEventListener('change', () => {
+            const isChecked = checkbox.checked;
+            const newCensorshipEnabled = isChecked;
+
+            // Ask the user to confirm reloading the page
+            const confirmReload = confirm("Changing this setting requires reloading the current page. Do you want to reload now?");
+            if (confirmReload) {
+                // If the user confirms, store the new state and reload the page
+                chrome.storage.local.set({ censorshipEnabled: newCensorshipEnabled });
+                chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+                    if (tabs.length > 0) {
+                        const activeTabId = tabs[0].id!;
+                        chrome.tabs.sendMessage(activeTabId, {
+                            action: 'toggleCensorship',
+                            enabled: newCensorshipEnabled
+                        });
+                        chrome.tabs.reload(activeTabId);
+                    }
+                });
+            } else {
+                checkbox.checked = previousCensorshipEnabled;
+            }
+        });
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     fetchCensorCount();
     fetchCensorCountFromAPI();
+    setupCensorCheckbox();
 });
