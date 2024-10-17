@@ -16,5 +16,10 @@
   ],
   "action": {
     "default_popup": "src/index.html"
+  },
+  "icons": {
+    "16": "resources/Lgo_robot_black.png",
+    "48": "resources/Lgo_robot_black.png",
+    "128": "resources/Lgo_robot_black.png"
   }
 }

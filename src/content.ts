@@ -117,19 +117,16 @@ function observeDocumentChanges() {
                 const newElementNodes: HTMLElement[] = [];
 
                 if (node instanceof HTMLElement) {
-
                     textSelectors.forEach(selector => {
                         if (node.matches(selector)) {
                             newElementNodes.push(node);
                         }
                     });
-
                     const elements = node.querySelectorAll(textSelectors.join(', '));
                     if (elements.length > 0) {
                         elements.forEach(element => newElementNodes.push(element as HTMLElement));
                     }
                 }
-
                 if (newElementNodes.length > 0) {
                     console.log(`Processing ${newElementNodes.length} new elements`);
                     processElements(newElementNodes);
