@@ -76,6 +76,7 @@ function logCensorCount(): void {
         Threat: censorCounts.Threat,
         Insult: censorCounts.Insult,
         Identity_hate: censorCounts.Identity_hate,
+        Censored: censorCounts.Censored
     };
 
 
@@ -130,7 +131,7 @@ function observeDocumentChanges() {
                 }
 
                 if (newElementNodes.length > 0) {
-                    console.log(`Processing ${newElementNodes.length} new elements`); // Console log for new elements
+                    console.log(`Processing ${newElementNodes.length} new elements`);
                     processElements(newElementNodes);
                 }
             });
@@ -145,7 +146,7 @@ function observeDocumentChanges() {
 }
 
 // Start observing for document changes with the desired selectors
-const textSelectors = ['[data-testid="tweetText"]', '[data-testid="postText"]']; // List of selectors for text elements
+const textSelectors = ['[data-testid="tweetText"]', '[data-testid="postText"]']; 
 observeDocumentChanges();
 
 setInterval(() => {

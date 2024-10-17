@@ -12,8 +12,7 @@
   "permissions": [
     "storage", 
     "activeTab", 
-    "scripting",
-    "http://localhost:5000/*"
+    "scripting"
   ],
   "action": {
     "default_popup": "src/index.html"

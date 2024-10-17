@@ -48,26 +48,41 @@ function fetchCensorCountFromAPI(): void {
 
 // #region Censoreship type
 
-let previousCensorshipEnabled: boolean = false;
+// Get references to the toggle checkbox and descriptions
+const toggleCheckbox = document.getElementById('toggle-preference') as HTMLInputElement;
+const flagRedDescription = document.querySelector('.flag-red') as HTMLSpanElement;
+const hideElementsDescription = document.querySelector('.hide-elements') as HTMLSpanElement;
 
-function setupCensorCheckbox() {
-    const checkbox = document.getElementById('toggleCheckbox') as HTMLInputElement; // Type assertion
+// Function to update the descriptions based on the toggle state
+function updateDescription() {
+    if (toggleCheckbox.checked) {
+        flagRedDescription.style.display = 'none'; 
+        hideElementsDescription.style.display = 'inline';
+        console.log('Flagging all censored items in red');
+    } else {
+        flagRedDescription.style.display = 'inline'; 
+        hideElementsDescription.style.display = 'none';
+        console.log('Hiding all censored items');
+    }
+}
 
-    if (checkbox) {
-        // Restore the checkbox state from local storage
+toggleCheckbox.dispatchEvent(new Event('change'));
+
+function setupCensorToggle() {
+    const toggle = document.getElementById('toggle-preference') as HTMLInputElement;
+
+    if (toggle) {
         chrome.storage.local.get('censorshipEnabled', (data) => {
-            previousCensorshipEnabled = data.censorshipEnabled !== undefined ? data.censorshipEnabled : false;
-            checkbox.checked = previousCensorshipEnabled;
+            const previousCensorshipEnabled = data.censorshipEnabled !== undefined ? data.censorshipEnabled : false;
+            toggle.checked = previousCensorshipEnabled;
         });
 
-        checkbox.addEventListener('change', () => {
-            const isChecked = checkbox.checked;
+        toggle.addEventListener('change', () => {
+            const isChecked = toggle.checked;
             const newCensorshipEnabled = isChecked;
 
-            // Ask the user to confirm reloading the page
             const confirmReload = confirm("Changing this setting requires reloading the current page. Do you want to reload now?");
             if (confirmReload) {
-                // If the user confirms, store the new state and reload the page
                 chrome.storage.local.set({ censorshipEnabled: newCensorshipEnabled });
                 chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
                     if (tabs.length > 0) {
@@ -80,8 +95,9 @@ function setupCensorCheckbox() {
                     }
                 });
             } else {
-                checkbox.checked = previousCensorshipEnabled;
+                toggle.checked = !newCensorshipEnabled; 
             }
+            updateDescription();
         });
     }
 }
@@ -217,7 +233,7 @@ document.getElementById('censored-word-input')?.addEventListener('keydown', (eve
 document.addEventListener('DOMContentLoaded', () => {
     fetchCensorCount();
     fetchCensorCountFromAPI();
-    setupCensorCheckbox();
+    setupCensorToggle();
     fetchTopCategories();
     fetchCensoredWords();
 });

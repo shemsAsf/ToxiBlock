@@ -49,27 +49,78 @@
         }
 
         /* Toggle Buttons */
-        .toggle-buttons {
+        .preferences {
             display: flex;
-            justify-content: center;
-            margin: 15px 0;
+            flex-direction: column;
+            align-items: center;
+            margin: 20px;
         }
 
-        .toggle-buttons button {
-            background-color: #eef2ff;
-            border: none;
-            padding: 10px 30px;
-            font-size: 14px;
-            margin: 0 5px;
-            border-radius: 25px;
-            color: #2C3E50;
+        .toggle-switch {
+            position: relative;
+            width: 50px; /* Reduced width */
+            height: 25px; /* Reduced height */
+            margin: 10px 0;
+        }
+
+        .toggle-checkbox {
+            display: none; /* Hide the checkbox */
+        }
+
+        .toggle-label {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             cursor: pointer;
+            background-color: #ccc;
+            border-radius: 50px;
+            padding: 3px; /* Reduced padding */
+            transition: background-color 0.2s ease;
         }
 
-        .toggle-buttons button.active {
-            background-color: #e0e8ff;
-            color: #1E2A3C;
-            font-weight: bold;
+        .toggle-inner {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .toggle-switch-circle {
+            position: absolute;
+            top: 2px; /* Adjusted for smaller size */
+            left: 2px; /* Adjusted for smaller size */
+            width: 20px; /* Reduced circle size */
+            height: 20px; /* Reduced circle size */
+            background-color: white;
+            border-radius: 50%;
+            transition: transform 0.2s ease;
+        }
+
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #ff4d4d; /* Color for flagged option */
+        }
+
+        .toggle-checkbox:checked + .toggle-label .toggle-switch-circle {
+            transform: translateX(25px); /* Adjusted to move circle */
+        }
+
+        .toggle-description {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            font-size: 12px; /* Reduced font size */
+            color: #333;
+        }
+
+        .hide-elements {
+            display: none;
+        }
+
+        .toggle-checkbox:checked ~ .toggle-description .flag-red {
+            display: none; /* Hide the description for flagged option */
+        }
+
+        .toggle-checkbox:checked ~ .toggle-description .hide-elements {
+            display: inline; /* Show the description for hide option */
         }
 
         /* Main Statistics */
@@ -264,15 +315,15 @@
         <!-- Stats Summary -->
         <div class="stats-summary">
             <div>
-                <p id="blocked-today">55</p>
+                <p id="blocked-today">0</p>
                 <p>Today</p>
             </div>
             <div>
-                <p id="blocked-this-month">200</p>
+                <p id="blocked-this-month">0</p>
                 <p>This Month</p>
             </div>
             <div>
-                <p id="total-results">1500</p>
+                <p id="total-results">0</p>
                 <p>Total</p>
             </div>
         </div>
@@ -280,19 +331,18 @@
         <!-- Censored Categories Section -->
         <div class="category-section">
             <h2>Censored Categories</h2>
-            <div class="category-item">
-                <p>Threat</p>
-                <p class="count red">6</p>
+            <div id="category-item-1" class="category-item">
+                <p id="category-name-1">---</p>
+                <p id="category-count-1" class="count red">0</p>
             </div>
-            <div class="category-item">
-                <p>Obscene</p>
-                <p class="count orange">5</p>
+            <div id="category-item-2" class="category-item">
+                <p id="category-name-2">---</p>
+                <p id="category-count-2" class="count orange">0</p>
             </div>
-            <div class="category-item">
-                <p>Slightly Toxic</p>
-                <p class="count grey">2</p>
+            <div id="category-item-3" class="category-item">
+                <p id="category-name-3">---</p>
+                <p id="category-count-3" class="count grey">0</p>
             </div>
-            <a href="#">View All</a>
         </div>
 
         <!-- Censored Words Section -->
@@ -300,33 +350,29 @@
             <h2>Censored Words</h2>
             <input id="censored-word-input" type="text" placeholder="Enter a word">
             <div class="word-list">
-                <span class="word-tag">War</span>
-                <span class="word-tag">Bitch</span>
-                <span class="word-tag">Sex</span>
-                <span class="word-tag">Murder</span>
-                <span class="word-tag">Pornography</span>
-                <span class="word-tag">Assault</span>
-                <span class="word-tag">Rape</span>
-                <span class="word-tag">Aggression</span>
-                <span class="word-tag">OnlyFans</span>
-                <span class="word-tag">Con</span>
             </div>
-            <div class="remove-all">Remove All</div>
         </div>
 
         <!-- Preferences Section -->
         <div class="preferences">
             <h2>Preferences</h2>
-            <div class="option">
-                <input type="radio" name="preference" value="flag-red" id="flag-red">
-                <label for="flag-red">I want to flag all censored items in red</label>
+            <div class="toggle-switch">
+                <input type="checkbox" id="toggle-preference" class="toggle-checkbox">
+                <label class="toggle-label" for="toggle-preference">
+                    <span class="toggle-inner"></span>
+                    <span class="toggle-switch-circle"></span>
+                </label>
             </div>
-            <div class="option">
-                <input type="radio" name="preference" value="hide-elements" id="hide-elements" checked>
-                <label for="hide-elements">I want to hide all censored items</label>
+            <div class="toggle-description">
+                <span class="flag-red">I want to flag all censored items in red</span>
+                <span class="hide-elements">I want to hide all censored items</span>
             </div>
         </div>
     </div>
+    
+    <!-- Inclure les fichiers js -->
+    <script src="../dist/popup.js"></script>
+    <script src="../dist/content.js"></script> 
 </body>
 
 </html>
