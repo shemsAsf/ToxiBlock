@@ -232,8 +232,8 @@
         </div>
 
         <!-- Main Statistics -->
-        <div class="main-stat">15</div>
-        <p>Censored elements on this page</p>
+        <div class="main-stat" id="blocked-this-page">0</div>
+        <p>Censored on this page</p>
 
         <!-- Robot Icon -->
         <div class="robot-icon">
@@ -243,11 +243,11 @@
         <!-- Stats Summary -->
         <div class="stats-summary">
             <div>
-                <p>55</p>
+                <p id="blocked-today">0</p>
                 <p>Censored Today</p>
             </div>
             <div>
-                <p>200</p>
+                <p id="blocked-this-month">0</p>
                 <p>Censored This Month</p>
             </div>
         </div>
@@ -255,40 +255,33 @@
         <!-- Censored Categories Section -->
         <div class="category-section">
             <h2>Censored Categories</h2>
-            <div class="category-item">
-                <p>Threatening</p>
-                <p class="count red">6</p>
+            <div id="category-item-1" class="category-item">
+                <p id="category-name-1">---</p>
+                <p id="category-count-1" class="count red">0</p>
             </div>
-            <div class="category-item">
-                <p>Obscene</p>
-                <p class="count orange">5</p>
+            <div id="category-item-2" class="category-item">
+                <p id="category-name-2">---</p>
+                <p id="category-count-2" class="count orange">0</p>
             </div>
-            <div class="category-item">
-                <p>Slightly Toxic</p>
-                <p class="count grey">2</p>
+            <div id="category-item-3" class="category-item">
+                <p id="category-name-3">---</p>
+                <p id="category-count-3" class="count grey">0</p>
             </div>
-            <a href="#">See all</a>
         </div>
 
         <!-- Censored Words Section -->
         <div class="censored-words">
             <h2>Censored Words</h2>
-            <input type="text" placeholder="Enter a word">
+            <input id="censored-word-input" type="text" placeholder="Enter a word">
             <div class="word-list">
-                <span class="word-tag">War</span>
-                <span class="word-tag">Slut</span>
-                <span class="word-tag">Sex</span>
-                <span class="word-tag">Murder</span>
-                <span class="word-tag">Porn</span>
-                <span class="word-tag">Bitch</span>
-                <span class="word-tag">Rape</span>
-                <span class="word-tag">Assault</span>
-                <span class="word-tag">OnlyFan</span>
-                <span class="word-tag">Asshole</span>
             </div>
             <p class="remove-all">Remove all</p>
         </div>
     </div>
+    
+    <!-- Inclure les fichiers js -->
+    <script src="../dist/popup.js"></script>
+    <script src="../dist/content.js"></script> 
 </body>
 
 </html>

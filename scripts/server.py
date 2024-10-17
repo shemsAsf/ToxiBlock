@@ -1,8 +1,77 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from predict_toxicity import detect_hate
 import sqlite3
 from datetime import datetime
+from tensorflow.keras.models import load_model
+from tensorflow.keras.preprocessing.sequence import pad_sequences
+import pickle
+import re
+import os
+
+# ===========================
+# AI Functionality
+# ===========================
+
+model_path = os.path.join('scripts', 'Model.h5')
+tokenizer_path = os.path.join('scripts', 'tokenizer.pickle')
+
+# Charger le modèle pré-entraîné
+best_model = load_model(model_path)
+
+# Catégories de toxicité
+categories = ['Toxic', 'Severe_toxic', 'Obscene', 'Threat', 'Insult', 'Identity_hate']
+
+# Seuil de probabilité
+threshold = 0.5
+
+# Charger le tokenizer sauvegardé
+with open(tokenizer_path, 'rb') as handle:
+    tokenizer = pickle.load(handle)
+
+# Nettoyer les nouveaux commentaires (comme dans la préparation initiale)
+def clean_text(text):
+    text = text.replace('\n', ' ')
+    text = re.sub(r"[^a-zA-Z0-9\s.,!?']", ' ', text)
+    text = re.sub(r'\s+', ' ', text)
+    return text.strip()
+
+def detect_hate(text):
+    text = clean_text(text)
+
+    censored_words = fetch_censored_words()
+
+    normalized_text = text.lower()
+    normalized_censored_words = [word.lower() for word in censored_words]
+    words_in_text = set(normalized_text.split())
+    # Check if any censored word is in the text
+    if any(censored_word in words_in_text for censored_word in normalized_censored_words):
+        print(text + " has returned with the category 'Censored'")
+        return "Censored"
+
+    # Convert new comments to sequences and pad them
+    sequences = tokenizer.texts_to_sequences([text])
+    padded_sequences = pad_sequences(sequences, padding='post', maxlen=150)  # Use the same maxlen as in training
+
+    # Make predictions on the new comments
+    predictions = best_model.predict(padded_sequences)
+
+    # Find the category with the highest prediction value
+    max_prediction = max(enumerate(predictions[0]), key=lambda x: x[1])
+    
+    # Get the category and the value
+    max_category = categories[max_prediction[0]]
+    max_value = max_prediction[1]
+
+    if max_value < threshold:
+        print(text + " has returned with the category 'safe'")
+        return "safe"
+    else:
+        print(text + " has returned with the category '" + max_category + "'")
+        return max_category 
+    
+# ===========================
+# Api
+# ===========================
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
@@ -50,8 +119,6 @@ def init_db():
     
     conn.close()
     print("Database initialized successfully.")
-
-categories = ['Toxic', 'Severe_toxic', 'Obscene', 'Threat', 'Insult', 'Identity_hate']
 
 @app.route('/detect-hate', methods=['POST'])
 def detect_hate_api():
@@ -145,39 +212,26 @@ def get_top_categories():
 
     return jsonify(response), 200
 
-@app.route('/add_censored_word', methods=['POST'])
-def addCensoredWord():
-    data = request.json
-    word = data.get('word', '')
-
+def fetch_censored_words():
     conn = sqlite3.connect('censor_data.db')
     cursor = conn.cursor()
 
     cursor.execute('''
         SELECT word 
         FROM censored_words 
-        WHERE word = ?
-    ''', )
-    result = cursor.fetchone()
-    if result:
-        print("Word already censored.")
-    else:
-        cursor.execute('INSERT INTO censored_words (word) VALUES (?)', word)
-        print(f"Inserted new entry for {word}")
+    ''')
+    result = cursor.fetchall()
+
+    censored_words = [row[0] for row in result]
 
     conn.close()
+    return censored_words
 
-@app.route('/get_censored_words', methods=['POST'])
+@app.route('/get_censored_words', methods=['GET'])
 def getCensoredWords():
-    conn = sqlite3.connect('censor_data.db')
-    cursor = conn.cursor()
+    censored_words = fetch_censored_words()
+    return jsonify({'censoredWords': censored_words}), 200
 
-    cursor.execute('''
-        SELECT word 
-        FROM censored_words 
-    ''', )
-    result = cursor.fetchall() or []
-    return jsonify({'censoredWords' : result}), 200
 
 
 if __name__ == '__main__':

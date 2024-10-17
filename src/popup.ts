@@ -1,3 +1,5 @@
+// #region Counters
+
 let CActual = 0;
 let CToday = 0;
 let CMonth = 0;
@@ -35,11 +37,16 @@ function fetchCensorCountFromAPI(): void {
             CToday = data.today_count || 0;
             CMonth = data.month_count || 0;
             updateCensorCount(); // Update the display after fetching
+            console.log("Updated counts");
         })
         .catch((error) => {
             console.error('Error fetching censor counts from API:', error);
         });
 }
+
+// #endregion Counters
+
+// #region Censoreship type
 
 let previousCensorshipEnabled: boolean = false;
 
@@ -79,6 +86,10 @@ function setupCensorCheckbox() {
     }
 }
 
+// #endregion Counters
+
+// #region Categories
+
 async function fetchTopCategories() {
     try {
         const response = await fetch('http://127.0.0.1:5000/get_top_categories'); 
@@ -94,31 +105,46 @@ async function fetchTopCategories() {
 }
 
 function displayCategories(categories: Array<{ category: string; count: number }>) {
-    const categoryList = document.getElementById('category-list');
-    if (categoryList) {
-        categoryList.innerHTML = '';
+    // Loop through up to 3 categories
+    for (let i = 1; i <= 3; i++) {
+        const category = categories[i - 1] || { category: '---', count: 0 };
+        
+        // Dynamically get the name and count elements by their IDs
+        const nameElement = document.getElementById(`category-name-${i}`);
+        const countElement = document.getElementById(`category-count-${i}`);
 
-        categories.forEach((item, index) => {
-            const categoryDiv = document.createElement('div');
-            categoryDiv.textContent = `${item.category}: ${item.count}`;
-            categoryDiv.className = 'category-item';
+        // Update category name and count if the elements exist
+        if (nameElement) {
+            nameElement.textContent = category.category;
+        }
+        if (countElement) {
+            countElement.textContent = category.count.toString();
+        }
+    }
+}
 
-            // Apply styles based on the index
-            switch (index) {
-                case 0:
-                    categoryDiv.style.color = 'brightred';
-                    categoryDiv.style.fontSize = '1.5em';
-                    break;
-                case 1:
-                    categoryDiv.style.color = 'orange';
-                    break;
-                case 2:
-                    categoryDiv.style.color = 'lightyellow';
-                    break;
-            }
+// #endregion Categories
 
-            categoryList.appendChild(categoryDiv);
-        });
+// #region Censored Words
+
+let censoredWords: Array<string> = []
+
+function addCensoredWord(word: string){
+    if (word && !censoredWords.includes(word)) {
+
+        fetch('http://localhost:5000/add_censored_word', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({"word": word}),
+        })
+        .then(response => response.json())
+        .then(() => {
+            censoredWords.push(word);
+            displayCensoredWords();
+            console.log(word, 'Added to the censored words');
+        })
     }
 }
 
@@ -129,30 +155,48 @@ async function fetchCensoredWords() {
             throw new Error('Network response was not ok');
         }
 
-        const censoredWords = await response.json();
-        displayCategories(censoredWords.censoredWords);
+        const tCensoredWords = await response.json();
+        censoredWords = tCensoredWords.censoredWords;
+        displayCensoredWords();
     } catch (error) {
-        console.error('Error fetching top categories:', error);
+        console.error('Error fetching censored words:', error);
     }
 }
 
-function displayCensoredWords(censoredWords: Array<string>) {
-    const wordsList = document.getElementById('censored-words-list');
-    if (wordsList) {
-        wordsList.innerHTML = '';
+function displayCensoredWords() {
+    const wordListDiv = document.querySelector('.word-list');
+    if (wordListDiv) {
+        wordListDiv.innerHTML = ''; 
 
-        censoredWords.forEach((e) => {
-            let li = document.createElement('li');
-            li.innerText = e;
-            wordsList.appendChild(li);
+        censoredWords.forEach((word) => {
+            let span = document.createElement('span');
+            span.innerText = word;
+            span.className = 'word-tag';
+            wordListDiv.appendChild(span);
         });
     }
 }
 
+document.getElementById('censored-word-input')?.addEventListener('keydown', (event) => {
+    const inputField = event.target as HTMLInputElement;
+    if (event.key === 'Enter') { 
+        const newWord = inputField.value.trim();
+
+        if (newWord) {
+            addCensoredWord(newWord);
+            inputField.value = '';
+        }
+    }
+});
+
+// #endregion Censored Words
 
 document.addEventListener('DOMContentLoaded', () => {
     fetchCensorCount();
     fetchCensorCountFromAPI();
     setupCensorCheckbox();
     fetchTopCategories();
+    fetchCensoredWords();
 });
+
+

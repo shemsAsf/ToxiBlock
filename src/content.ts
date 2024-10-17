@@ -5,6 +5,7 @@ interface CensorCounts {
     Threat: number;
     Insult: number;
     Identity_hate: number;
+    Censored: number;
     Total: number;
 }
 
@@ -15,6 +16,7 @@ const censorCounts: CensorCounts = {
     Threat: 0,
     Insult: 0,
     Identity_hate: 0,
+    Censored:0,
     Total: 0,
 };
 
