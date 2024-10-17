@@ -54,3 +54,5 @@ ENV/
 *.crx
 *.pem
 manifest.json
+
+*.db

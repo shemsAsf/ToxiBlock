@@ -212,6 +212,34 @@ def get_top_categories():
 
     return jsonify(response), 200
 
+@app.route('/add_censored_word', methods=['POST'])
+def addCensoredWord():
+    data = request.json
+    word = data.get('word', '')
+
+    print("word: " + word)
+
+    conn = sqlite3.connect('censor_data.db')
+    cursor = conn.cursor()
+
+    # Check if the word is already in the database
+    cursor.execute('''SELECT word FROM censored_words WHERE word = ?''', (word,))
+    result = cursor.fetchone()
+    
+    if result:
+        print("Word already censored.")
+        conn.close() 
+        return jsonify({"message": "Word already censored."}), 400  
+    else:
+        cursor.execute('INSERT INTO censored_words (word) VALUES (?)', (word,))
+        conn.commit() 
+        conn.close() 
+        print(f"Inserted new entry for {word}")
+        
+        return jsonify({"message": "Word added successfully."}), 201 
+
+    
+
 def fetch_censored_words():
     conn = sqlite3.connect('censor_data.db')
     cursor = conn.cursor()
@@ -232,6 +260,19 @@ def getCensoredWords():
     censored_words = fetch_censored_words()
     return jsonify({'censoredWords': censored_words}), 200
 
+@app.route('/remove_censored_word', methods=['DELETE'])
+def remove_censored_word():
+    data = request.json
+    word = data.get('word', '')
+
+    conn = sqlite3.connect('censor_data.db')
+    cursor = conn.cursor()
+
+    cursor.execute('DELETE FROM censored_words WHERE word = ?', (word,))
+    conn.commit()
+    conn.close()
+
+    return jsonify({'message': f'Word "{word}" removed successfully.'}), 200
 
 
 if __name__ == '__main__':

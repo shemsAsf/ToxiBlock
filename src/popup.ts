@@ -172,9 +172,32 @@ function displayCensoredWords() {
             let span = document.createElement('span');
             span.innerText = word;
             span.className = 'word-tag';
+            span.onclick = () => removeCensoredWord(word); // Add click event
             wordListDiv.appendChild(span);
         });
     }
+}
+
+function removeCensoredWord(word: string) {
+    fetch('http://localhost:5000/remove_censored_word', {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ "word": word }),
+    })
+    .then(response => {
+        if (response.ok) {
+            censoredWords = censoredWords.filter(w => w !== word);
+            displayCensoredWords(); 
+            console.log(`${word} removed from censored words`);
+        } else {
+            console.error('Failed to remove the word from censored words');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
 }
 
 document.getElementById('censored-word-input')?.addEventListener('keydown', (event) => {
