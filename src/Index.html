@@ -1,123 +1,294 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ToxiBlock</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
             background-color: #f9f9f9;
             margin: 0;
-            padding: 20px;
-            width: 300px;
-        }
-
-        .rounded-div {
-            border: 1px solid #ccc;
-            border-radius: 10px;
-            padding: 20px;
-            background-color: #f9f9f9; /* Light background for better contrast */
-        }
-
-        .category-item {
-            margin: 5px 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #ffffff;
         }
 
         .container {
-            text-align: center;
+            width: 350px;
+            background-color: white;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+            border-radius: 16px;
+            padding: 20px;
+            box-sizing: border-box;
+            position: relative;
+            overflow: hidden;
         }
 
         h1 {
-            font-size: 22px;
-            color: #333;
-            margin-bottom: 10px;
+            font-size: 24px;
+            font-weight: bold;
+            margin: 0;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        h1 img {
+            width: 24px;
+            height: 24px;
+            margin-right: 8px;
+        }
+
+        .profile-icon {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+
+        .toggle-buttons {
+            display: flex;
+            justify-content: center;
+            margin: 15px 0;
+        }
+
+        .toggle-buttons button {
+            background-color: #eef2ff;
+            border: none;
+            padding: 10px 30px;
+            font-size: 14px;
+            margin: 0 5px;
+            border-radius: 25px;
+            color: #2C3E50;
+            cursor: pointer;
+        }
+
+        .toggle-buttons button.active {
+            background-color: #e0e8ff;
+            color: #1E2A3C;
+            font-weight: bold;
+        }
+
+        .main-stat {
+            font-size: 48px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 20px 0 10px 0;
+            text-align: center;
         }
 
         p {
             margin: 5px 0;
-            font-size: 16px;
+            text-align: center;
             color: #666;
         }
 
-        .stats {
+        .robot-icon {
+            display: flex;
+            justify-content: center;
+            margin: 15px 0;
+        }
+
+        .robot-icon img {
+            width: 60px;
+            height: 60px;
+        }
+
+        .stats-summary {
             display: flex;
             justify-content: space-between;
-            padding: 10px 0;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .stats-summary div {
+            background-color: #f1f3ff;
+            padding: 15px;
+            border-radius: 12px;
+            width: 48%;
+			margin-right: 10px;
+        }
+		
+		.stats-summary div:last-child {
+			margin-right: 0; 
+		}
+
+        .stats-summary div p {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 0;
+            color: #2c3e50;
+        }
+
+        .category-section {
+            margin-top: 20px;
+        }
+
+        .category-section h2 {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .category-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
+        .category-item p {
+            margin: 0;
             font-size: 14px;
         }
 
-        .score-box {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px;
-            margin-top: 20px;
-            border-radius: 8px;
-            font-size: 18px;
-        }
-
-        .score-box span {
-            font-size: 22px;
+        .category-item .count {
             font-weight: bold;
         }
 
-        .footer {
-            font-size: 12px;
-            color: #888;
-            margin-top: 15px;
+        .category-item .count.red {
+            color: #FF6666;
+        }
+
+        .category-item .count.orange {
+            color: #FFA500;
+        }
+
+        .category-item .count.grey {
+            color: grey;
+        }
+
+        .category-section a {
+            text-align: right;
+            display: block;
+            margin-top: 5px;
+            color: #1E90FF;
+            font-size: 14px;
+        }
+
+        .censored-words {
+            margin-top: 20px;
+        }
+
+        .censored-words h2 {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .censored-words input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .word-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .word-tag {
+            background-color: #eef2ff;
+            color: #333;
+            padding: 8px 12px;
+            border-radius: 16px;
+            font-size: 14px;
+            display: inline-block;
+            cursor: pointer;
+        }
+
+        .remove-all {
+            color: red;
+            font-size: 14px;
+            text-align: right;
+            cursor: pointer;
+            margin-top: 10px;
         }
     </style>
-
 </head>
+
 <body>
     <div class="container">
         <!-- Nom de l'extension -->
-        <h1>ToxiBlock</h1>
+        <h1><img src="path/to/icon.png" alt="icon">Toxiblock</h1>
 
-        <!-- Description -->
-        <p>Bloqueur de contenu toxique</p>
-
-        <!-- Statistiques -->
-        <div class="stats">
-            <p>Éléments bloqués sur cette page :</p>
-            <p id="blocked-this-page">0</p>
+        <!-- Icône de profil -->
+        <div class="profile-icon">
+            <img src="path/to/profile-icon.png" alt="Profile Icon" width="32" height="32">
         </div>
 
-        <div class="stats">
-            <p>Éléments bloqués aujourd'hui :</p>
-            <p id="blocked-today">0</p>
+        <!-- Toggle Buttons for "Today" and "This Month" -->
+        <div class="toggle-buttons">
+            <button class="active">Today</button>
+            <button>This Month</button>
         </div>
 
-        <div class="stats">
-            <p>Éléments bloqués ce mois ci :</p>
-            <p id="blocked-this-month">0</p>
+        <!-- Main Statistics -->
+        <div class="main-stat">15</div>
+        <p>Censored elements on this page</p>
+
+        <!-- Robot Icon -->
+        <div class="robot-icon">
+            <img src="path/to/robot-icon.png" alt="Robot Icon">
         </div>
 
-        <div id="top-categories" class="rounded-div">
-            <h1>Top Censored Categories</h1>
-            <div id="category-list"></div>
+        <!-- Stats Summary -->
+        <div class="stats-summary">
+            <div>
+                <p>55</p>
+                <p>Censored Today</p>
+            </div>
+            <div>
+                <p>200</p>
+                <p>Censored This Month</p>
+            </div>
         </div>
 
-        <!-- Score total dans un rectangle -->
-        <div class="score-box">
-            Score Total : <span id="blocked-total">0</span>
+        <!-- Censored Categories Section -->
+        <div class="category-section">
+            <h2>Censored Categories</h2>
+            <div class="category-item">
+                <p>Threatening</p>
+                <p class="count red">6</p>
+            </div>
+            <div class="category-item">
+                <p>Obscene</p>
+                <p class="count orange">5</p>
+            </div>
+            <div class="category-item">
+                <p>Slightly Toxic</p>
+                <p class="count grey">2</p>
+            </div>
+            <a href="#">See all</a>
         </div>
 
-        <!-- Pied de page avec des informations -->
-        <div class="footer">
-            <p>Protégez-vous du contenu toxique avec ToxiBlock.</p>
+        <!-- Censored Words Section -->
+        <div class="censored-words">
+            <h2>Censored Words</h2>
+            <input type="text" placeholder="Enter a word">
+            <div class="word-list">
+                <span class="word-tag">War</span>
+                <span class="word-tag">Slut</span>
+                <span class="word-tag">Sex</span>
+                <span class="word-tag">Murder</span>
+                <span class="word-tag">Porn</span>
+                <span class="word-tag">Bitch</span>
+                <span class="word-tag">Rape</span>
+                <span class="word-tag">Assault</span>
+                <span class="word-tag">OnlyFan</span>
+                <span class="word-tag">Asshole</span>
+            </div>
+            <p class="remove-all">Remove all</p>
         </div>
-        <label>
-            <input type="checkbox" id="toggleCheckbox"> Fully Censor
-        </label>
-    
-
-        <ul id="censored-words-list"></ul>
-    
     </div>
-
-    <!-- Inclure les fichiers js -->
-    <script src="../dist/popup.js"></script>
-    <script src="../dist/content.js"></script> 
 </body>
+
 </html>
