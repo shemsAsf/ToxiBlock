@@ -1,32 +1,64 @@
-let censorCount = 0;
-let censorCountToSend = 0;
+interface CensorCounts {
+    Toxic: number;
+    Severe_toxic: number;
+    Obscene: number;
+    Threat: number;
+    Insult: number;
+    Identity_hate: number;
+    Censored: number;
+    Total: number;
+}
+
+const censorCounts: CensorCounts = {
+    Toxic: 0,
+    Severe_toxic: 0,
+    Obscene: 0,
+    Threat: 0,
+    Insult: 0,
+    Identity_hate: 0,
+    Censored:0,
+    Total: 0,
+};
+
+let isCensorshipEnabled: boolean = false;
+
+let newCensoredElem = false;
 
 async function censoredText(element: HTMLElement) {
     const textContent = element.innerText;
-
-    // Send the text content to your Flask API for hate speech detection
     try {
         const response = await fetch('http://localhost:5000/detect-hate', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ tweet: textContent }), // Sending the text content to detect
+            body: JSON.stringify({ tweet: textContent }),
         });
 
         if (response.ok) {
             const data = await response.json();
-            if (data.is_hateful) {
-                const span = document.createElement('span');
-                span.style.color = 'red';
-                span.textContent = textContent; // Set the text content to the original text
-                element.innerHTML = ''; // Clear previous content
-                element.appendChild(span); // Append the styled span
+            if (data.category !== "safe") {
+                const detectedCategory: keyof CensorCounts = data.category;
                 
-                censorCount ++;
-                censorCountToSend ++;
-                chrome.storage.local.set({ 'censorCount': censorCount });
-                chrome.runtime.sendMessage({ count: censorCount });
+                let modifiedTextContent = textContent;
+                const span = document.createElement('span');
+        
+                if (isCensorshipEnabled) {
+                    modifiedTextContent = textContent.replace(/[^ ]/g, '*');
+                } else {
+                    span.style.color = 'red';
+                }
+                span.textContent = modifiedTextContent;
+                span.title = `Detected category: ${detectedCategory}`;
+                element.innerHTML = ''; 
+                element.appendChild(span);
+
+                censorCounts[detectedCategory] = (censorCounts[detectedCategory] || 0) + 1;
+                censorCounts["Total"] = (censorCounts["Total"] || 0) + 1;
+
+                chrome.storage.local.set({ 'censorCount': censorCounts["Total"] });
+                chrome.runtime.sendMessage({ count: censorCounts["Total"] });
+                newCensoredElem = true;
             }
         } else {
             console.error('Error detecting hate speech:', response.statusText);
@@ -37,18 +69,35 @@ async function censoredText(element: HTMLElement) {
 }
 
 function logCensorCount(): void {
+    const dataToSend = {
+        Toxic: censorCounts.Toxic,
+        Severe_toxic: censorCounts.Severe_toxic,
+        Obscene: censorCounts.Obscene,
+        Threat: censorCounts.Threat,
+        Insult: censorCounts.Insult,
+        Identity_hate: censorCounts.Identity_hate,
+        Censored: censorCounts.Censored
+    };
+
+
     fetch('http://localhost:5000/log_censor', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ count: censorCountToSend }),
+        body: JSON.stringify(dataToSend),
     }).then(response => response.json())
       .then(data => {
-          console.log('Censor log stored:', data);
+            console.log('Censor log stored:', data);
+
+            for (let category in censorCounts) {
+                if (category !== 'Total') {
+                    censorCounts[category as keyof CensorCounts] = 0;
+                }
+            }
       })
       .catch((error) => {
-          console.error('Error logging censor data:', error);
+            console.error('Error logging censor data:', error);
       });
 }
 
@@ -68,21 +117,18 @@ function observeDocumentChanges() {
                 const newElementNodes: HTMLElement[] = [];
 
                 if (node instanceof HTMLElement) {
-
                     textSelectors.forEach(selector => {
                         if (node.matches(selector)) {
                             newElementNodes.push(node);
                         }
                     });
-
                     const elements = node.querySelectorAll(textSelectors.join(', '));
                     if (elements.length > 0) {
                         elements.forEach(element => newElementNodes.push(element as HTMLElement));
                     }
                 }
-
                 if (newElementNodes.length > 0) {
-                    console.log(`Processing ${newElementNodes.length} new elements`); // Console log for new elements
+                    console.log(`Processing ${newElementNodes.length} new elements`);
                     processElements(newElementNodes);
                 }
             });
@@ -97,12 +143,25 @@ function observeDocumentChanges() {
 }
 
 // Start observing for document changes with the desired selectors
-const textSelectors = ['[data-testid="tweetText"]', '[data-testid="postText"]']; // List of selectors for text elements
+const textSelectors = ['[data-testid="tweetText"]', '[data-testid="postText"]']; 
 observeDocumentChanges();
 
 setInterval(() => {
-    if (censorCount > 0) {
+    if(newCensoredElem){
         logCensorCount();
-        censorCountToSend = 0; 
+        newCensoredElem = false;
     }
 }, (5000));
+
+chrome.storage.local.get('censorshipEnabled', (data) => {
+    if (data.censorshipEnabled !== undefined) {
+        isCensorshipEnabled = data.censorshipEnabled;
+    }
+});
+
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.action === 'toggleCensorship') {
+        isCensorshipEnabled = request.enabled;
+        console.log("toggleCensorship ", isCensorshipEnabled);
+    }
+});

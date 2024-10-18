@@ -1,98 +1,379 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ToxiBlock</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
             background-color: #f9f9f9;
             margin: 0;
-            padding: 20px;
-            width: 300px;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
         }
 
         .container {
-            text-align: center;
+            width: 100%; /* Modify to take full width of the page */
+            max-width: 400px; /* Maximum width for layout */
+            background-color: white;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+            border-radius: 16px;
+            padding: 20px;
+            box-sizing: border-box;
         }
 
-        h1 {
-            font-size: 22px;
+        /* Header Section */
+        .header {
+            display: flex;
+            justify-content: space-between; /* Align content to each side */
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .header img {
+            width: 100px; /* Width of your logo */
+            height: auto; /* Automatic height to maintain ratio */
+        }
+
+        .profile-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 54px; /* Rounded shape */
+            background: url('path/to/profile-icon.png') lightgray no-repeat; /* Path to profile icon */
+            background-size: cover;
+        }
+
+        /* Toggle Buttons */
+        .preferences {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 20px;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 25px;
+            display: inline-block;
+            z-index: 1; /* Bring the toggle in front of other elements */
+            margin: 10px 0; /* Add some spacing around the toggle */
+        }
+
+        .toggle-checkbox {
+            display: none; /* Hide the default checkbox */
+        }
+
+        .toggle-label {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+            height: 100%;
+            background-color: #ddd;
+            border-radius: 50px;
+            cursor: pointer;
+            z-index: 2;
+        }
+
+        .toggle-label .toggle-inner {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            border-radius: 50px;
+            transition: background-color 0.3s;
+        }
+
+        .toggle-label .toggle-switch-circle {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 19px;
+            height: 19px;
+            background-color: white;
+            border-radius: 50%;
+            transition: left 0.3s;
+        }
+
+        .toggle-checkbox:checked + .toggle-label .toggle-inner {
+            background-color: #f44336;
+        }
+
+        .toggle-checkbox:checked + .toggle-label .toggle-switch-circle {
+            left: calc(100% - 22px); /* Shift the circle to the right when checked */
+        }
+
+        .toggle-description {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            font-size: 12px; /* Reduced font size */
             color: #333;
-            margin-bottom: 10px;
+        }
+
+        .hide-elements {
+            display: none;
+        }
+
+        .toggle-checkbox:checked ~ .toggle-description .flag-red {
+            display: none; /* Hide the description for flagged option */
+        }
+
+        .toggle-checkbox:checked ~ .toggle-description .hide-elements {
+            display: inline; /* Show the description for hide option */
+        }
+
+        /* Main Statistics */
+        .main-stat {
+            font-size: 48px;
+            font-weight: bold;
+            color: #2c3e50;
+            text-align: center;
         }
 
         p {
             margin: 5px 0;
-            font-size: 16px;
+            text-align: center;
             color: #666;
         }
 
-        .stats {
+        /* Robot Icon */
+        .robot-icon {
+            display: flex;
+            justify-content: center;
+            margin: 15px 0;
+        }
+
+        .robot-icon img {
+            width: 60px;
+            height: 60px;
+        }
+
+        /* Stats Summary */
+        .stats-summary {
             display: flex;
             justify-content: space-between;
-            padding: 10px 0;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .stats-summary div {
+            background-color: #f1f3ff;
+            padding: 15px;
+            border-radius: 12px;
+            width: 30%; /* Reduce width to add a third block */
+            margin-right: 10px;
+        }
+
+        .stats-summary div:last-child {
+            margin-right: 0;
+        }
+
+        .stats-summary div p {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 0;
+            color: #2c3e50;
+        }
+
+        /* Censored Categories Section */
+        .category-section {
+            margin-top: 20px;
+        }
+
+        .category-section h2 {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .category-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
+        .category-item p {
+            margin: 0;
             font-size: 14px;
         }
 
-        .score-box {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px;
-            margin-top: 20px;
-            border-radius: 8px;
-            font-size: 18px;
-        }
-
-        .score-box span {
-            font-size: 22px;
+        .category-item .count {
             font-weight: bold;
         }
 
-        .footer {
-            font-size: 12px;
-            color: #888;
-            margin-top: 15px;
+        .category-item .count.red {
+            color: #FF6666;
         }
+
+        .category-item .count.orange {
+            color: #FFA500;
+        }
+
+        .category-item .count.grey {
+            color: grey;
+        }
+
+        .category-section a {
+            text-align: right;
+            display: block;
+            margin-top: 5px;
+            color: #1E90FF;
+            font-size: 14px;
+        }
+
+        /* Censored Words Section */
+        .censored-words {
+            margin-top: 20px;
+        }
+
+        .censored-words h2 {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .censored-words input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .word-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .word-tag {
+            background-color: #eef2ff;
+            color: #333;
+            padding: 8px 12px;
+            border-radius: 16px;
+            font-size: 14px;
+            display: inline-block;
+            cursor: pointer;
+        }
+
+        .remove-all {
+            color: red;
+            font-size: 14px;
+            text-align: right;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        /* Preferences Section */
+        .preferences {
+            margin-top: 20px;
+        }
+
+        .preferences input[type="radio"] {
+            margin-right: 10px;
+        }
+
+        .preferences label {
+            font-size: 14px;
+            color: #333;
+        }
+
+        .preferences .option {
+            margin-bottom: 8px;
+        }
+
     </style>
 </head>
+
 <body>
     <div class="container">
-        <!-- Nom de l'extension -->
-        <h1>ToxiBlock</h1>
-
-        <!-- Description -->
-        <p>Bloqueur de contenu toxique</p>
-
-        <!-- Statistiques -->
-        <div class="stats">
-            <p>Éléments bloqués sur cette page :</p>
-            <p id="blocked-this-page">0</p>
+        <!-- Header Section with logo and profile icon -->
+        <div class="header">
+            <img src="../resources/Logo_black.png" alt="ToxiBlock Logo"> <!-- Replace with your logo -->
+            <div class="profile-icon"></div>
         </div>
 
-        <div class="stats">
-            <p>Éléments bloqués ce mois-ci :</p>
-            <p id="blocked-this-month">0</p>
+    <!-- Preferences Section -->
+    <div class="preferences">
+        <h2>Preferences</h2>
+        <div class="toggle-switch">
+            <input type="checkbox" id="toggle-preference" class="toggle-checkbox">
+            <label class="toggle-label" for="toggle-preference">
+                <span class="toggle-inner"></span>
+                <span class="toggle-switch-circle"></span>
+            </label>
         </div>
-
-        <div class="stats">
-            <p>Éléments bloqués au total :</p>
-            <p id="blocked-total">0</p>
-        </div>
-
-        <!-- Score total dans un rectangle -->
-        <div class="score-box">
-            Score Total : <span id="total-score">0</span>
-        </div>
-
-        <!-- Pied de page avec des informations -->
-        <div class="footer">
-            <p>Protégez-vous du contenu toxique avec ToxiBlock.</p>
+        <div class="toggle-description">
+            <span class="flag-red">I want to flag all censored items in red</span>
+            <span class="hide-elements">I want to hide all censored items</span>
         </div>
     </div>
+    
+        <!-- Main Statistics -->
+        <div class="main-stat" id="blocked-this-page">15</div>
+        <p>censored items on this page</p>
 
-    <!-- Inclure le fichier popup.js -->
-    <script src="popup.js"></script>
+        <!-- Robot Icon -->
+        <div class="robot-icon">
+            <img src="../resources/Lgo_robot_black.png" alt="Robot Icon">
+        </div>
+
+        <!-- Stats Summary -->
+        <div class="stats-summary">
+            <div>
+                <p id="blocked-today">0</p>
+                <p>Today</p>
+            </div>
+            <div>
+                <p id="blocked-this-month">0</p>
+                <p>This Month</p>
+            </div>
+            <div>
+                <p id="blocked-total">0</p>
+                <p>Total</p>
+            </div>
+        </div>
+
+        <!-- Censored Categories Section -->
+        <div class="category-section">
+            <h2>Censored Categories</h2>
+            <div id="category-item-1" class="category-item">
+                <p id="category-name-1">---</p>
+                <p id="category-count-1" class="count red">0</p>
+            </div>
+            <div id="category-item-2" class="category-item">
+                <p id="category-name-2">---</p>
+                <p id="category-count-2" class="count orange">0</p>
+            </div>
+            <div id="category-item-3" class="category-item">
+                <p id="category-name-3">---</p>
+                <p id="category-count-3" class="count grey">0</p>
+            </div>
+        </div>
+
+        <!-- Censored Words Section -->
+        <div class="censored-words">
+            <h2>Censored Words</h2>
+            <input id="censored-word-input" type="text" placeholder="Enter a word">
+            <div class="word-list">
+            </div>
+        </div>        
+    </div>
+    
+    <!-- Inclure les fichiers js -->
+    <script src="../dist/popup.js"></script>
+    <script src="../dist/content.js"></script> 
 </body>
+
 </html>
