@@ -1,89 +1,58 @@
+# ToxiBlock - Chrome Extension
 
-# ToxiBlock
+ToxiBlock is a Chrome extension designed to help identify and censor hate speech on social media platforms like Twitter. The extension either censors or flags harmful text in red based on user preferences.
 
-**ToxiBlock** est une application de classification des commentaires toxiques qui utilise un modèle de Machine Learning basé sur TensorFlow et Keras. Ce projet permet de prédire les probabilités qu'un commentaire soit toxique, très toxique, obscène, une menace, une insulte, ou contienne des propos haineux visant une identité.
+## Installation Guide
 
-## Sommaire
+1. **Prerequisites:**
+   - Make sure you have Python 3.11 installed on your system.
 
-L'objectif de **ToxiBlock** est de créer un système capable de détecter des commentaires inappropriés ou nuisibles, permettant ainsi de modérer des forums, des réseaux sociaux, ou toute plateforme où la sécurité des interactions est primordiale. Grâce à un modèle pré-entraîné, l'application peut analyser des textes et assigner des probabilités à différentes catégories de toxicité.
+2. **Setting Up the Project:**
+   - Clone or download this repository to your local machine.
+   - Navigate to the project directory and run the following setup scripts:
+     1. Run `setup.bat` to install the necessary dependencies.
+     2. Run `start.bat` to start the Flask server, which must remain running locally for the extension to work properly.
 
-## Fonctionnalités principales
-- **Classification des commentaires** : L'application prend en entrée un commentaire et prédit les probabilités qu'il appartienne à l'une des six catégories de toxicité :
-  1. **Toxic** : Toxique en général
-  2. **Severe_toxic** : Très toxique
-  3. **Obscene** : Obscène
-  4. **Threat** : Menace
-  5. **Insult** : Insulte
-  6. **Identity_hate** : Discours haineux visant une identité (race, sexe, etc.)
+3. **Install the Chrome Extension:**
+   - Open Chrome and go to the Extensions page: [chrome://extensions/](chrome://extensions/).
+   - Enable **Developer Mode** in the top-right corner.
+   - Click on **Load unpacked** and select the project folder. This will load the ToxiBlock extension into Chrome.
+   - When prompted, grant the necessary permissions.
 
-- **Modèle pré-entraîné** : Le modèle est basé sur des couches LSTM bidirectionnelles pour capturer les dépendances temporelles dans le texte. Le modèle est stocké dans un fichier **`Model.h5`**.
+4. **Using the Extension:**
+   - After installation, visit [Twitter](https://x.com/).
+   - The extension will either censor or flag potentially harmful content in red, based on the option selected in the popup window of the extension.
 
-- **Nettoyage des données** : Les commentaires sont nettoyés avant d'être analysés, éliminant les caractères spéciaux et les espaces superflus pour une meilleure précision du modèle.
-
-- **Personnalisation des prédictions** : L'utilisateur peut facilement ajuster le seuil de probabilité pour définir à partir de quel pourcentage un commentaire est jugé toxique.
-
-## Prérequis
-
-Le projet nécessite **Python 3.7+** et les bibliothèques suivantes pour fonctionner :
-
-- **TensorFlow** : Pour l'exécution du modèle d'apprentissage profond.
-- **Keras Tuner** : Pour l'optimisation des hyperparamètres du modèle.
-- **Pandas** : Pour la gestion des données.
-- **NumPy** : Pour les calculs mathématiques et la manipulation de tableaux.
-- **Matplotlib** et **Seaborn** : Pour les visualisations de données.
-- **Pickle5** : Pour la sérialisation du tokenizer.
-
-## Installation
-
-Pour installer les dépendances, vous pouvez exécuter l'une des commandes suivantes en fonction du fichier fourni :
-
-### Via `requirements.txt` :
-```bash
-pip install -r requirements.txt
-```
-
-### Via `setup.py` :
-```bash
-python setup.py install
-```
-
-## Utilisation
-
-1. Clonez ce dépôt sur votre machine locale :
-   ```bash
-   git clone https://github.com/shemsAsf/ToxiBlock.git
-   cd ToxiBlock
-   ```
-
-2. Installez les dépendances :
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-3. Lancez le script de prédiction **`predict_toxicity.py`** pour analyser de nouveaux commentaires :
-   ```bash
-   python predict_toxicity.py
-   ```
-
-### Exemple d'utilisation
-
-```python
-new_comments = ["You are an awful person!", "Have a great day!"]
+5. **Adding Censored Words:**
+   - You can manually add words that you want to censor through the popup interface of the extension. Simply open the popup, enter the word you want to censor, and press Enter.
+   - Once added, any post containing this word will automatically be blocked or flagged by the extension on Twitter, regardless of whether the text is detected as hate speech by the AI.
 
 
-# Faire des prédictions sur les commentaires
-predictions = best_model.predict(padded_sequences)
+## How It Works
 
-# Résultat :
-# Commentaire 1: Toxic: 78%, Insult: 65%
-# Commentaire 2: Aucune toxicité détectée
-```
+### Functionality
+- ToxiBlock monitors text on Twitter and censors or flags it based on a home-trained AI model.
+- The user can toggle between censoring and flagging mode using a checkbox in the popup window.
+- Users can also add specific words to censor through the popup, and the extension will block every post that contains these words.
 
-## Contribution
+### Technical Details
 
-Les contributions sont les bienvenues ! Si vous souhaitez ajouter de nouvelles fonctionnalités ou améliorer le code existant, n'hésitez pas à forker le projet et soumettre une pull request.
+#### TypeScript and JavaScript
+- The project is written in TypeScript and compiled to JavaScript, which is used to inject the content script into the browser to detect and modify the web page in real time.
 
-## Licence
+#### Flask Server and AI Model
+- The extension communicates with a Flask server running locally, which processes text using a home-trained AI model.
+  
+  The AI model is responsible for categorizing text into one of six potential categories of toxicity, including `Toxic`, `Severe_toxic`, `Obscene`, `Threat`, `Insult`, and `Identity_hate`. When new text is processed, the AI model predicts the level of hate speech based on these categories. If the prediction exceeds a set probability threshold, the text is flagged as harmful.
 
-Ce projet est sous licence MIT. Consultez le fichier [LICENSE](./LICENSE) pour plus de détails.
+  Additionally, a list of censored words is checked against the text. If any of these words are present, the script return the category `Censored` and the text is immediately flagged or censored, bypassing the AI prediction.
 
+  The text is pre-processed by cleaning it, removing unwanted characters, and tokenizing it before being fed into the model. Predictions are then made, and the text is classified as either safe, censored, or falling into one of the defined hate speech categories.
+
+### SQLite Database
+
+We use an SQLite database to store logs of detected hate speech and a list of censored words. The database contains two tables:
+
+- `censor_log`: Tracks the category of detected speech, the count, and the date of detection.
+  
+- `censored_words`: Stores words that are to be censored.
