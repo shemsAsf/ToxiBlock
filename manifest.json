@@ -1,25 +1,26 @@
 {
-    "manifest_version": 3,
-    "name": "ToxiBlock",
-    "description": "Block Hate Speach",
-    "version": "1.0",
-    "content_scripts": [
+  "manifest_version": 3,
+  "name": "ToxiBlock",
+  "description": "Block Hate Speech",
+  "version": "1.0",
+  "content_scripts": [
     {
       "matches": ["https://x.com/*"],
-      "js": ["dist/content.js"]
+      "js": ["dist/content.js"],
+      "css": ["src/style.css"]
     }
   ],
   "permissions": [
-    "storage", 
-    "activeTab", 
+    "storage",
+    "activeTab",
     "scripting"
   ],
   "action": {
     "default_popup": "src/index.html"
   },
   "icons": {
-    "16": "resources/Lgo_robot_black.png",
-    "48": "resources/Lgo_robot_black.png",
-    "128": "resources/Lgo_robot_black.png"
+    "16": "resources/Toxiblock_icon.png",
+    "48": "resources/Toxiblock_icon.png",
+    "128": "resources/Toxiblock_icon.png"
   }
 }

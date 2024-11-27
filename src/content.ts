@@ -45,11 +45,11 @@ async function censoredText(element: HTMLElement) {
         
                 if (isCensorshipEnabled) {
                     modifiedTextContent = textContent.replace(/[^ ]/g, '*');
+                    span.title = textContent;
                 } else {
-                    span.style.color = 'red';
+                    span.style.color = '#e74c3c';
                 }
                 span.textContent = modifiedTextContent;
-                span.title = `Detected category: ${detectedCategory}`;
                 element.innerHTML = ''; 
                 element.appendChild(span);
 

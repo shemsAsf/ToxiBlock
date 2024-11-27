@@ -1,11 +1,12 @@
 {
   "compilerOptions": {
     "outDir": "./dist",
-    "target": "ES6",
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "node",
     "lib": ["dom", "es6"],
-    "module": "commonjs",
     "strict": true
   },
-  "include": ["src/**/*.ts"],
+  "include": ["src/**/*.ts", "node_modules/chart.js"],
   "exclude": ["node_modules"]
 }

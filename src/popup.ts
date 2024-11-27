@@ -1,4 +1,7 @@
 // #region Counters
+interface CensorCounts {
+    [date: string]: number;
+}
 
 let CActual = 0;
 let CToday = 0;
@@ -29,18 +32,53 @@ function fetchCensorCount(): void {
     });
 }
 
-function fetchCensorCountFromAPI(): void {
-    fetch('http://localhost:5000/get_censor_counts')
-        .then(response => response.json())
+function fetchRawCensorCountPerDayFromAPI(): Promise<CensorCounts | undefined> {
+    return fetch('http://localhost:5000/get_censor_counts')
+        .then(response => {
+            return response.json();
+        })
         .then(data => {
-            CTotal = data.total_count || 0;
-            CToday = data.today_count || 0;
-            CMonth = data.month_count || 0;
-            updateCensorCount(); // Update the display after fetching
-            console.log("Updated counts");
+            console.log('Data received from API:', data);
+            return data;
         })
         .catch((error) => {
             console.error('Error fetching censor counts from API:', error);
+        });
+}
+
+
+function populateCensorCounts(): void {
+    fetchRawCensorCountPerDayFromAPI()
+        .then((data: CensorCounts | undefined) => {
+            if (!data) return; 
+            
+            console.log(data)
+            const dailyCounts = data; 
+            let totalCount = 0;
+            let todayCount = 0;
+            let monthCount = 0;
+
+            const todayDate = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
+            const currentMonth = todayDate.slice(0, 7); // Get the current month (YYYY-MM)
+
+            // Calculate the total count, today's count, and the monthly count
+            for (const [date, count] of Object.entries(dailyCounts)) {
+                totalCount += count;
+                if (date === todayDate) {
+                    todayCount = count;
+                }
+                if (date.startsWith(currentMonth)) {
+                    monthCount += count;
+                }
+            }
+
+            // Update the display with the counts
+            CTotal = totalCount;
+            CToday = todayCount;
+            CMonth = monthCount;
+            updateCensorCount();
+
+            console.log("Updated counts: Total:", CTotal, "Today:", CToday, "Month:", CMonth);
         });
 }
 
@@ -97,8 +135,20 @@ function setupCensorToggle() {
             } else {
                 toggle.checked = !newCensorshipEnabled; 
             }
+            updateHeaderImage(newCensorshipEnabled);
             updateDescription();
         });
+    }
+}
+
+function updateHeaderImage(isCensorshipEnabled: boolean) {
+    const headerImage = document.getElementById('header-image') as HTMLImageElement;
+    if (headerImage) {
+        if (isCensorshipEnabled) {
+            headerImage.src = '../resources/Toxiblock_logo_censored.png'; // Set image when censorship is enabled
+        } else {
+            headerImage.src = '../resources/Toxiblock_logo_flagged.png'; // Set image when censorship is disabled
+        }
     }
 }
 
@@ -232,10 +282,14 @@ document.getElementById('censored-word-input')?.addEventListener('keydown', (eve
 
 document.addEventListener('DOMContentLoaded', () => {
     fetchCensorCount();
-    fetchCensorCountFromAPI();
+    populateCensorCounts();
     setupCensorToggle();
     fetchTopCategories();
     fetchCensoredWords();
+
+    chrome.storage.local.get('censorshipEnabled', (data) => {
+        const censorshipEnabled = data.censorshipEnabled !== undefined ? data.censorshipEnabled : false;
+        updateHeaderImage(censorshipEnabled);
+        updateDescription(); 
+    });
 });
-
-

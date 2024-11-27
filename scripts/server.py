@@ -163,27 +163,15 @@ def get_censor_counts():
     conn = sqlite3.connect('censor_data.db')
     cursor = conn.cursor()
 
-    # Get total count
-    cursor.execute('SELECT SUM(count) FROM censor_log')
-    total_count = cursor.fetchone()[0] or 0
+    # Get counts grouped by day
+    cursor.execute('SELECT date, SUM(count) FROM censor_log GROUP BY date ORDER BY date DESC')
+    daily_counts = cursor.fetchall() 
 
-    # Get today's count
-    today = datetime.now().strftime('%Y-%m-%d')
-    cursor.execute('SELECT SUM(count) FROM censor_log WHERE date = ?', (today,))
-    today_count = cursor.fetchone()[0] or 0
-
-    # Get this month's count
-    month = datetime.now().strftime('%Y-%m')
-    cursor.execute('SELECT SUM(count) FROM censor_log WHERE date LIKE ?', (f'{month}%',))
-    month_count = cursor.fetchone()[0] or 0
-
+    # Format data as a dictionary for easier access
+    daily_data = {row[0]: row[1] for row in daily_counts}
     conn.close()
 
-    return jsonify({
-        'total_count': total_count,
-        'today_count': today_count,
-        'month_count': month_count
-    }), 200
+    return jsonify(daily_data), 200
 
 @app.route('/get_top_categories', methods=['GET'])
 def get_top_categories():

@@ -4,8 +4,8 @@ setup(
     name='ToxiBlock',
     version='1.0.0',
     description='Un modèle pour la classification des commentaires toxiques.',
-    author='Ton Nom',
-    author_email='ton.email@example.com',
+    author='ASFOURI Shems',
+    author_email='shems.asfouri@gmail.com',
     packages=find_packages(),
     include_package_data=True,
     install_requires=[
